@@ -1,30 +1,34 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Header from "@/components/Header";
-import MonthSelector from "@/components/MonthSelector";
-import ScheduleCard from "@/components/ScheduleCard";
-import ActivitySuggestions from "@/components/ActivitySuggestions";
+import MinistryList from "@/components/MinistryList";
 import NoticesSection from "@/components/NoticesSection";
-import { ministrySchedule, MinistryDay } from "@/data/ministryData";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
-  const currentMonth = new Date().toLocaleString("pt-BR", { month: "long" });
-  const formattedMonth = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
-  
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"schedule" | "notices">("schedule");
-  const [selectedMonth, setSelectedMonth] = useState(
-    ministrySchedule[formattedMonth] ? formattedMonth : "Janeiro"
-  );
-  const [selectedDay, setSelectedDay] = useState<MinistryDay | null>(null);
 
-  const scheduleForMonth = ministrySchedule[selectedMonth] || [];
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
-  const handleDaySelect = (day: MinistryDay) => {
-    setSelectedDay(day);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  const handleBackToSchedule = () => {
-    setSelectedDay(null);
-  };
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,36 +36,7 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {activeTab === "schedule" ? (
-          <>
-            {selectedDay ? (
-              <ActivitySuggestions day={selectedDay} onBack={handleBackToSchedule} />
-            ) : (
-              <>
-                <MonthSelector
-                  selectedMonth={selectedMonth}
-                  onMonthChange={setSelectedMonth}
-                />
-
-                {scheduleForMonth.length > 0 ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {scheduleForMonth.map((day, index) => (
-                      <ScheduleCard
-                        key={`${day.date}-${index}`}
-                        day={day}
-                        onClick={() => handleDaySelect(day)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground text-lg">
-                      Nenhuma ministração cadastrada para {selectedMonth}.
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-          </>
+          <MinistryList />
         ) : (
           <NoticesSection />
         )}

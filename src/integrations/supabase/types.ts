@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ministries: {
+        Row: {
+          activities: string[] | null
+          bible_book: string | null
+          created_at: string
+          date: string
+          day_of_week: string
+          id: string
+          objective: string | null
+          theme: string | null
+          updated_at: string
+          user_id: string
+          verse: string | null
+        }
+        Insert: {
+          activities?: string[] | null
+          bible_book?: string | null
+          created_at?: string
+          date: string
+          day_of_week: string
+          id?: string
+          objective?: string | null
+          theme?: string | null
+          updated_at?: string
+          user_id: string
+          verse?: string | null
+        }
+        Update: {
+          activities?: string[] | null
+          bible_book?: string | null
+          created_at?: string
+          date?: string
+          day_of_week?: string
+          id?: string
+          objective?: string | null
+          theme?: string | null
+          updated_at?: string
+          user_id?: string
+          verse?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
