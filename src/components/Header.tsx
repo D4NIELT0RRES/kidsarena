@@ -1,4 +1,7 @@
-import { Baby, Bell, Calendar, Sparkles } from "lucide-react";
+import { Heart, Calendar, Bell, LogOut, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   activeTab: "schedule" | "notices";
@@ -6,41 +9,60 @@ interface HeaderProps {
 }
 
 const Header = ({ activeTab, onTabChange }: HeaderProps) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
   return (
-    <header className="hero-gradient py-6 px-4 shadow-soft">
-      <div className="container mx-auto">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="relative">
-            <Baby className="w-10 h-10 text-primary-foreground float-animation" />
-            <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1" />
+    <header className="bg-card shadow-card sticky top-0 z-10">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Heart className="w-8 h-8 text-primary fill-primary" />
+            <h1 className="text-2xl font-fredoka font-bold text-foreground">
+              Kids Baby
+            </h1>
           </div>
-          <h1 className="text-3xl md:text-4xl font-fredoka font-bold text-primary-foreground tracking-tight">
-            Kids Baby
-          </h1>
+          
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="w-4 h-4" />
+                <span>{user.email}</span>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
+          )}
         </div>
 
-        <nav className="flex justify-center gap-2">
+        <nav className="flex gap-2">
           <button
             onClick={() => onTabChange("schedule")}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
               activeTab === "schedule"
-                ? "bg-card text-foreground shadow-card scale-105"
-                : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
           >
-            <Calendar className="w-5 h-5" />
-            <span>Ministrações</span>
+            <Calendar className="w-4 h-4" />
+            Ministrações
           </button>
           <button
             onClick={() => onTabChange("notices")}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
               activeTab === "notices"
-                ? "bg-card text-foreground shadow-card scale-105"
-                : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
           >
-            <Bell className="w-5 h-5" />
-            <span>Avisos</span>
+            <Bell className="w-4 h-4" />
+            Avisos
           </button>
         </nav>
       </div>
