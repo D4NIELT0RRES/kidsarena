@@ -31,10 +31,10 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-4xl animate-fade-in">
         {activeTab === "schedule" ? (
           <MinistryList />
         ) : (
@@ -42,8 +42,10 @@ const Index = () => {
         )}
       </main>
 
-      <footer className="py-6 text-center text-muted-foreground text-sm">
-        <p>Kids Baby © {new Date().getFullYear()} - Feito com 💖 para os pequeninos</p>
+      <footer className="py-8 text-center border-t border-primary/10 bg-card/50">
+        <p className="text-muted-foreground text-sm">
+          Kids Baby © {new Date().getFullYear()} - Feito com 💖 para os pequeninos
+        </p>
       </footer>
     </div>
   );
