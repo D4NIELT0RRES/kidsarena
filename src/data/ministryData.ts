@@ -254,7 +254,7 @@ export const notices = [
   {
     id: "1",
     title: "Chegue com antecedência",
-    description: "Chegue pelo menos 15 minutos antes para preparar a sala, o lanche e orar pela ministração.",
+    description: "Chegue pelo menos 20 minutos antes para preparar a sala, o lanche e orar.",
     icon: "clock",
     priority: "high"
   },
@@ -275,35 +275,21 @@ export const notices = [
   {
     id: "4",
     title: "Prepare o material",
-    description: "Separe todo o material necessário para a atividade antes das crianças chegarem.",
+    description: "Verifique com antecedência qual será a atividade com alguma tia do Kids 2.",
     icon: "package",
     priority: "medium"
   },
   {
     id: "5",
     title: "Mantenha a sala organizada",
-    description: "Após o culto, organize a sala, lave os copos e deixe tudo pronto para o próximo encontro.",
+    description: "Após o culto, organize a sala, lave os copos, deixe tudo pronto para o próximo encontro e sempre verifique se o ar condicionado está desligado.",
     icon: "home",
     priority: "low"
   },
   {
     id: "6",
-    title: "Registro de presença",
-    description: "Anote a presença das crianças e qualquer observação importante sobre elas.",
-    icon: "clipboard",
-    priority: "medium"
-  },
-  {
-    id: "7",
-    title: "Comunicação com os pais",
-    description: "Ao entregar a criança, compartilhe brevemente o que foi ministrado e como ela participou.",
-    icon: "message",
-    priority: "medium"
-  },
-  {
-    id: "8",
     title: "Cuidados com segurança",
-    description: "Nunca deixe as crianças sozinhas. A porta deve estar sempre visível e os pais identificados.",
+    description: "Nunca deixe as crianças sozinhas. Quando começar a aula a porta deverá estar fechada. Quando levar no banheiro, esperar do lado de fora.",
     icon: "shield",
     priority: "high"
   }

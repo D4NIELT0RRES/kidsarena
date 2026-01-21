@@ -4,26 +4,18 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Heart, Mail, Lock, User } from 'lucide-react';
+import { Heart, User } from 'lucide-react';
 import { z } from 'zod';
 
-const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-});
-
-const signupSchema = loginSchema.extend({
+const nameSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
 });
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signInWithName } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,42 +24,18 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const result = loginSchema.safeParse({ email, password });
-        if (!result.success) {
-          setError(result.error.errors[0].message);
-          setLoading(false);
-          return;
-        }
+      const result = nameSchema.safeParse({ name });
+      if (!result.success) {
+        setError(result.error.errors[0].message);
+        setLoading(false);
+        return;
+      }
 
-        const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            setError('E-mail ou senha incorretos');
-          } else {
-            setError('Erro ao fazer login. Tente novamente.');
-          }
-        } else {
-          navigate('/');
-        }
+      const { error } = await signInWithName(name.trim());
+      if (error) {
+        setError('Erro ao entrar. Tente novamente.');
       } else {
-        const result = signupSchema.safeParse({ email, password, name });
-        if (!result.success) {
-          setError(result.error.errors[0].message);
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await signUp(email, password, name);
-        if (error) {
-          if (error.message.includes('User already registered')) {
-            setError('Este e-mail já está cadastrado');
-          } else {
-            setError('Erro ao criar conta. Tente novamente.');
-          }
-        } else {
-          navigate('/');
-        }
+        navigate('/');
       }
     } catch {
       setError('Ocorreu um erro inesperado');
@@ -87,55 +55,24 @@ const Auth = () => {
             </h1>
           </div>
           <p className="text-muted-foreground">
-            {isLogin ? 'Entre na sua conta' : 'Crie sua conta'}
+            Digite seu nome para entrar 💖
           </p>
         </div>
 
         <div className="bg-card p-6 rounded-2xl shadow-card border-2 border-primary/20">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Seu nome"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            )}
-
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="name">Seu Nome</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="name"
+                  type="text"
+                  placeholder="Digite seu nome"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  autoFocus
                 />
               </div>
             </div>
@@ -147,22 +84,9 @@ const Auth = () => {
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}
+              {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError('');
-              }}
-              className="text-primary hover:underline text-sm"
-            >
-              {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
-            </button>
-          </div>
         </div>
       </div>
     </div>

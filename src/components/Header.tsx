@@ -9,7 +9,7 @@ interface HeaderProps {
 }
 
 const Header = ({ activeTab, onTabChange }: HeaderProps) => {
-  const { user, signOut } = useAuth();
+  const { user, userName, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -30,9 +30,9 @@ const Header = ({ activeTab, onTabChange }: HeaderProps) => {
           
           {user && (
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className="w-4 h-4" />
-                <span>{user.email}</span>
+                <span className="font-medium">{userName || 'Voluntária'}</span>
               </div>
               <Button variant="ghost" size="icon" onClick={handleSignOut}>
                 <LogOut className="w-5 h-5" />
