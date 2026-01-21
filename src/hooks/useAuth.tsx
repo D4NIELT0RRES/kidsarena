@@ -11,7 +11,26 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
+interface StoredCredentials {
+  email: string;
+  password: string;
+  name: string;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Normalize name for consistent matching
+const normalizeName = (name: string): string => {
+  return name.trim().toLowerCase().replace(/\s+/g, ' ');
+};
+
+// Generate deterministic credentials from name
+const generateCredentials = (normalizedName: string): { email: string; password: string } => {
+  const nameSlug = normalizedName.replace(/\s+/g, '_');
+  const email = `${nameSlug}@kidsbaby.app`;
+  const password = `kb_${nameSlug}_secure_2024`;
+  return { email, password };
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -20,12 +39,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for stored name in localStorage
-    const storedName = localStorage.getItem('kids_baby_user_name');
-    if (storedName) {
-      setUserName(storedName);
-    }
-
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -48,12 +61,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (session?.user) {
         fetchUserProfile(session.user.id);
+      } else {
+        // Try to auto-login with stored credentials
+        autoLoginWithStoredCredentials();
       }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const autoLoginWithStoredCredentials = async () => {
+    const stored = localStorage.getItem('kids_baby_credentials');
+    if (stored) {
+      try {
+        const credentials: StoredCredentials = JSON.parse(stored);
+        const { error } = await supabase.auth.signInWithPassword({
+          email: credentials.email,
+          password: credentials.password,
+        });
+        
+        if (!error) {
+          setUserName(credentials.name);
+        } else {
+          // Invalid stored credentials, clear them
+          localStorage.removeItem('kids_baby_credentials');
+        }
+      } catch {
+        localStorage.removeItem('kids_baby_credentials');
+      }
+    }
+  };
 
   const fetchUserProfile = async (userId: string) => {
     const { data } = await supabase
@@ -64,48 +102,60 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     if (data?.name) {
       setUserName(data.name);
-      localStorage.setItem('kids_baby_user_name', data.name);
     }
   };
 
   const signInWithName = async (name: string): Promise<{ error: Error | null }> => {
     try {
-      // Generate a unique email based on name and timestamp
-      const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      const email = `${name.toLowerCase().replace(/\s+/g, '_')}_${uniqueId}@kidsbaby.local`;
-      const password = uniqueId + '_secure_password';
+      const trimmedName = name.trim();
+      const normalizedName = normalizeName(trimmedName);
+      const { email, password } = generateCredentials(normalizedName);
 
-      // Sign up with auto-generated credentials
+      // Try to sign in first (existing user)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (!signInError) {
+        // Successful login - store credentials
+        const credentials: StoredCredentials = { email, password, name: trimmedName };
+        localStorage.setItem('kids_baby_credentials', JSON.stringify(credentials));
+        setUserName(trimmedName);
+        return { error: null };
+      }
+
+      // If login failed, create new account
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            name: name
-          }
+          data: { name: trimmedName }
         }
       });
 
       if (signUpError) {
+        // Check if user exists but password is wrong (shouldn't happen with deterministic credentials)
+        if (signUpError.message.includes('already registered')) {
+          return { error: new Error('Este nome já está em uso com credenciais diferentes. Tente um nome diferente.') };
+        }
         return { error: signUpError };
       }
 
       if (authData.user) {
-        // Create profile with the user's name
-        const { error: profileError } = await supabase
+        // Create profile
+        await supabase
           .from('profiles')
           .insert({
             user_id: authData.user.id,
-            name: name
+            name: trimmedName
           });
 
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-        }
-
-        setUserName(name);
-        localStorage.setItem('kids_baby_user_name', name);
+        // Store credentials for future logins
+        const credentials: StoredCredentials = { email, password, name: trimmedName };
+        localStorage.setItem('kids_baby_credentials', JSON.stringify(credentials));
+        setUserName(trimmedName);
       }
 
       return { error: null };
@@ -117,7 +167,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setUserName(null);
-    localStorage.removeItem('kids_baby_user_name');
+    localStorage.removeItem('kids_baby_credentials');
   };
 
   return (

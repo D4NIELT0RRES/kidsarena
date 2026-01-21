@@ -113,39 +113,55 @@ const MinistryList = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <MonthSelector
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
         />
-        <Button onClick={() => setShowForm(true)} className="gap-2">
+        <Button 
+          onClick={() => setShowForm(true)} 
+          className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <Plus className="w-4 h-4" />
           Nova Ministração
         </Button>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center justify-center py-16">
+          <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">Carregando ministrações...</p>
         </div>
       ) : ministries.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {ministries.map((ministry) => (
-            <MinistryCard
-              key={ministry.id}
-              ministry={ministry}
-              currentUserId={user?.id}
-              onEdit={handleEdit}
-              onDelete={setDeleteId}
-            />
+          {ministries.map((ministry, index) => (
+            <div 
+              key={ministry.id} 
+              className="animate-slide-up"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <MinistryCard
+                ministry={ministry}
+                currentUserId={user?.id}
+                onEdit={handleEdit}
+                onDelete={setDeleteId}
+              />
+            </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-card rounded-2xl border-2 border-dashed border-muted">
-          <p className="text-muted-foreground text-lg mb-4">
-            Nenhuma ministração cadastrada para {selectedMonth}.
+        <div className="text-center py-16 bg-gradient-to-br from-card to-card/50 rounded-3xl border-2 border-dashed border-primary/20">
+          <div className="text-6xl mb-4">📅</div>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            Nenhuma ministração em {selectedMonth}
+          </h3>
+          <p className="text-muted-foreground mb-6">
+            Seja a primeira a adicionar uma ministração!
           </p>
-          <Button onClick={() => setShowForm(true)} variant="outline" className="gap-2">
+          <Button 
+            onClick={() => setShowForm(true)} 
+            className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+          >
             <Plus className="w-4 h-4" />
             Adicionar primeira ministração
           </Button>
