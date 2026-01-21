@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -29,12 +29,26 @@ const MinistryForm = ({ open, onClose, onSuccess, editingMinistry }: MinistryFor
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const [date, setDate] = useState(editingMinistry?.date || '');
-  const [bibleBook, setBibleBook] = useState(editingMinistry?.bible_book || '');
-  const [theme, setTheme] = useState(editingMinistry?.theme || '');
-  const [verse, setVerse] = useState(editingMinistry?.verse || '');
-  const [objective, setObjective] = useState(editingMinistry?.objective || '');
-  const [activities, setActivities] = useState<string[]>(editingMinistry?.activities || ['']);
+  const [date, setDate] = useState('');
+  const [bibleBook, setBibleBook] = useState('');
+  const [theme, setTheme] = useState('');
+  const [verse, setVerse] = useState('');
+  const [objective, setObjective] = useState('');
+  const [activities, setActivities] = useState<string[]>(['']);
+
+  // Load editing data when editingMinistry changes
+  useEffect(() => {
+    if (editingMinistry) {
+      setDate(editingMinistry.date || '');
+      setBibleBook(editingMinistry.bible_book || '');
+      setTheme(editingMinistry.theme || '');
+      setVerse(editingMinistry.verse || '');
+      setObjective(editingMinistry.objective || '');
+      setActivities(editingMinistry.activities?.length ? editingMinistry.activities : ['']);
+    } else {
+      resetForm();
+    }
+  }, [editingMinistry]);
 
   const getDayOfWeek = (dateStr: string) => {
     const date = new Date(dateStr + 'T12:00:00');
