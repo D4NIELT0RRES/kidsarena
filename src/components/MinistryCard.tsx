@@ -25,6 +25,7 @@ interface MinistryCardProps {
 }
 
 const MinistryCard = ({ ministry, currentUserId, onEdit, onDelete }: MinistryCardProps) => {
+  const isLoggedIn = !!currentUserId;
   const isOwner = currentUserId === ministry.user_id;
   const isThursday = ministry.day_of_week === 'Quinta';
   const hasContent = ministry.theme || ministry.bible_book || ministry.verse;
@@ -63,7 +64,7 @@ const MinistryCard = ({ ministry, currentUserId, onEdit, onDelete }: MinistryCar
             </Badge>
           </div>
         </div>
-        {isOwner && (
+        {isLoggedIn && (
           <div className="flex gap-1">
             <Button
               variant="ghost"
@@ -152,7 +153,7 @@ const MinistryCard = ({ ministry, currentUserId, onEdit, onDelete }: MinistryCar
           <p className="text-muted-foreground italic mb-2">
             ✨ Ministração ainda não preenchida
           </p>
-          {isOwner && (
+          {isLoggedIn && (
             <Button 
               variant="outline" 
               size="sm" 
